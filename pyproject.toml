@@ -1,0 +1,17 @@
+[project]
+name = "download-gmail-attachments"
+version = "0.1.0"
+description = "Download Gmail attachments by message ID, producing a machine-readable manifest"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["tests"]
+markers = [
+    "integration: end-to-end tests requiring gws CLI authentication",
+]
