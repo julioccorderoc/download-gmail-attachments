@@ -1,0 +1,109 @@
+{
+  "id": "19d77c4017cb684d",
+  "internalDate": "1775830823000",
+  "labelIds": ["UNREAD", "IMPORTANT", "INBOX"],
+  "sizeEstimate": 571407,
+  "payload": {
+    "body": { "size": 0 },
+    "filename": "",
+    "mimeType": "multipart/mixed",
+    "headers": [
+      { "name": "From", "value": "Test Sender <sender@example.com>" },
+      { "name": "To", "value": "recipient@example.com" },
+      { "name": "Subject", "value": "Fw: Update on open orders | Protab | NCL" },
+      { "name": "Date", "value": "Fri, 10 Apr 2026 14:20:23 +0000" },
+      { "name": "Content-Type", "value": "multipart/mixed; boundary=\"_008_boundary_\"" },
+      { "name": "MIME-Version", "value": "1.0" }
+    ],
+    "parts": [
+      {
+        "body": { "size": 0 },
+        "filename": "",
+        "mimeType": "multipart/related",
+        "headers": [
+          { "name": "Content-Type", "value": "multipart/related; boundary=\"_007_boundary_\"; type=\"multipart/alternative\"" }
+        ],
+        "parts": [
+          {
+            "body": { "size": 0 },
+            "filename": "",
+            "mimeType": "multipart/alternative",
+            "headers": [
+              { "name": "Content-Type", "value": "multipart/alternative; boundary=\"_000_boundary_\"" }
+            ],
+            "parts": [
+              {
+                "body": { "size": 5127 },
+                "filename": "",
+                "mimeType": "text/plain",
+                "headers": [
+                  { "name": "Content-Type", "value": "text/plain; charset=\"utf-8\"" }
+                ]
+              },
+              {
+                "body": { "size": 27115 },
+                "filename": "",
+                "mimeType": "text/html",
+                "headers": [
+                  { "name": "Content-Type", "value": "text/html; charset=\"utf-8\"" }
+                ]
+              }
+            ]
+          },
+          {
+            "body": {
+              "attachmentId": "ANGjdJ9_inline_image001",
+              "size": 2298
+            },
+            "filename": "image001.jpg",
+            "mimeType": "image/jpeg",
+            "headers": [
+              { "name": "Content-Type", "value": "image/jpeg; name=\"image001.jpg\"" },
+              { "name": "Content-Disposition", "value": "inline; filename=\"image001.jpg\"; size=2298" },
+              { "name": "Content-ID", "value": "<image001.jpg@01DCB773.61BDC120>" }
+            ]
+          },
+          {
+            "body": {
+              "attachmentId": "ANGjdJ9_inline_image002",
+              "size": 3264
+            },
+            "filename": "image002.jpg",
+            "mimeType": "image/jpeg",
+            "headers": [
+              { "name": "Content-Type", "value": "image/jpeg; name=\"image002.jpg\"" },
+              { "name": "Content-Disposition", "value": "inline; filename=\"image002.jpg\"; size=3264" },
+              { "name": "Content-ID", "value": "<image002.jpg@01DCB77E.98C4F840>" }
+            ]
+          }
+        ]
+      },
+      {
+        "body": {
+          "attachmentId": "ANGjdJ8_pdf_attachment_1",
+          "size": 184394
+        },
+        "filename": "YK772_MONOLAURIN 600 MG AND L-LYSINE HCL 600 MG CAPSULE _PO_PT02.pdf",
+        "mimeType": "application/pdf",
+        "headers": [
+          { "name": "Content-Type", "value": "application/pdf; name=\"YK772_MONOLAURIN 600 MG AND L-LYSINE HCL 600 MG CAPSULE _PO_PT02.pdf\"" },
+          { "name": "Content-Disposition", "value": "attachment; filename=\"YK772_MONOLAURIN 600 MG AND L-LYSINE HCL 600 MG CAPSULE _PO_PT02.pdf\"; size=184394" },
+          { "name": "Content-ID", "value": "<176003CC50E6FC46B2F3519D2A142C7A@example.com>" }
+        ]
+      },
+      {
+        "body": {
+          "attachmentId": "ANGjdJ9_pdf_attachment_2",
+          "size": 184392
+        },
+        "filename": "YK772A_MONOLAURIN 600 MG AND L-LYSINE HCL 600 MG CAPSULE _PO_PT02.pdf",
+        "mimeType": "application/pdf",
+        "headers": [
+          { "name": "Content-Type", "value": "application/pdf; name=\"YK772A_MONOLAURIN 600 MG AND L-LYSINE HCL 600 MG CAPSULE _PO_PT02.pdf\"" },
+          { "name": "Content-Disposition", "value": "attachment; filename=\"YK772A_MONOLAURIN 600 MG AND L-LYSINE HCL 600 MG CAPSULE _PO_PT02.pdf\"; size=184392" },
+          { "name": "Content-ID", "value": "<F85F1F535BF3A64698FD2DBB176EB0A0@example.com>" }
+        ]
+      }
+    ]
+  }
+}
