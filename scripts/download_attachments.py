@@ -13,9 +13,28 @@ from pathlib import Path
 from _gws import GwsError, fetch_message, fetch_attachment
 from _mime import walk_parts, filter_parts
 from _fileops import decode_attachment, sanitize_filename, resolve_collision, atomic_write, compute_sha256
-from _manifest import FileEntry, SkippedEntry, build_manifest
+from _manifest import FileEntry, Manifest, SkippedEntry, build_manifest
 
 logger = logging.getLogger(__name__)
+
+
+def _print_summary(
+    file_entries: list[FileEntry],
+    skipped_entries: list[SkippedEntry],
+    output_path: Path,
+    json_summary: bool,
+    manifest: Manifest,
+) -> None:
+    """Print stderr summary line and optional JSON summary to stdout."""
+    total_parts = len(file_entries) + len(skipped_entries)
+    total_bytes = sum(f.size_bytes for f in file_entries)
+    print(
+        f"Downloaded {len(file_entries)}/{total_parts} attachments "
+        f"({_format_bytes(total_bytes)}) \u2192 {output_path}/",
+        file=sys.stderr,
+    )
+    if json_summary:
+        print(json.dumps(asdict(manifest.summary), indent=2))
 
 
 def _format_bytes(n: int) -> str:
@@ -88,18 +107,7 @@ def run(args: list[str]) -> int:
             opts.message_id, metadata, file_entries, skipped_entries, str(output_path)
         )
         manifest.write(output_path)
-
-        total_parts = len(file_entries) + len(skipped_entries)
-        total_bytes = sum(f.size_bytes for f in file_entries)
-        print(
-            f"Downloaded {len(file_entries)}/{total_parts} attachments "
-            f"({_format_bytes(total_bytes)}) \u2192 {output_path}/",
-            file=sys.stderr,
-        )
-
-        if opts.json_summary:
-            print(json.dumps(asdict(manifest.summary), indent=2))
-
+        _print_summary(file_entries, skipped_entries, output_path, opts.json_summary, manifest)
         return 4
 
     for part in kept:
@@ -179,18 +187,8 @@ def run(args: list[str]) -> int:
         print(f"Error writing manifest: {e}", file=sys.stderr)
         return 5
 
-    # 7. Print stderr summary
-    total_parts = len(file_entries) + len(skipped_entries)
-    total_bytes = sum(f.size_bytes for f in file_entries)
-    print(
-        f"Downloaded {len(file_entries)}/{total_parts} attachments "
-        f"({_format_bytes(total_bytes)}) \u2192 {output_path}/",
-        file=sys.stderr,
-    )
-
-    # 8. JSON summary to stdout
-    if opts.json_summary:
-        print(json.dumps(asdict(manifest.summary), indent=2))
+    # 7. Print stderr summary + optional JSON summary
+    _print_summary(file_entries, skipped_entries, output_path, opts.json_summary, manifest)
 
     return 0
 

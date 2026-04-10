@@ -70,7 +70,7 @@ Steps in order:
 
 Primary interface between skill and agent. Everything agent needs to decide next — without reading files.
 
-**Location:** `<output-dir>/manifest.json`
+**Location:** `<output-dir>/manifest_<message-id>.json`
 
 ```json
 {
@@ -162,7 +162,7 @@ Agent inspects email contents before committing.
 
 - **stderr** — one-line summary: `Downloaded 2/4 attachments (368.8 KB) → ~/Downloads/coa_downloads/`
 - **stdout** — nothing default. `--json-summary` prints manifest summary JSON.
-- **Manifest** — always at `<output-dir>/manifest.json`
+- **Manifest** — always at `<output-dir>/manifest_<message-id>.json`
 
 ## Skill Prompt Design
 
@@ -182,7 +182,7 @@ All logic in script. Prompt teaches **how to invoke**, not internals.
 
 ### Dependencies
 
-- Python 3.9+ (stdlib only: `json`, `base64`, `hashlib`, `pathlib`, `subprocess`, `fnmatch`)
+- Python 3.13+ (stdlib only: `json`, `base64`, `hashlib`, `pathlib`, `subprocess`, `fnmatch`)
 - `gws` CLI (installed + authenticated)
 
 ### File Structure
