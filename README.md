@@ -2,70 +2,83 @@
 
 ![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue?logo=python&logoColor=white)
 ![stdlib only](https://img.shields.io/badge/dependencies-zero-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-green)
 ![gws CLI](https://img.shields.io/badge/gws-v0.22.5%2B-orange)
-![Tests](https://img.shields.io/badge/tests-pytest-yellow?logo=pytest)
+![Tests](https://img.shields.io/badge/tests-121_passing-yellow?logo=pytest)
 
-One command. Gmail message ID in, decoded files + manifest out. No gws knowledge needed.
+Agent skill that downloads Gmail attachments by message ID. One command — files + manifest out. Zero gws knowledge needed.
 
-Agent give message ID. Script fetch, parse MIME, decode base64, write files, produce manifest. Agent read manifest, decide next step. Done.
-
-## Why
-
-Without this: 7+ tool calls, learn gws syntax, wrestle MIME trees, decode URL-safe base64. Every conversation re-learn same quirks. Bad.
-
-With this: one call. Zero discovery. Manifest tell agent everything.
-
-## Quick Start
+## Install
 
 ```bash
-# install
-uv sync --group dev
-
-# run
-uv run python scripts/download_attachments.py <message-id> --to ./downloads
-
-# read result
-cat ./downloads/manifest_<message-id>.json
+npx skills add julioccorderoc/download-gmail-attachments -g -y
 ```
 
-## Flags
+Or install to a specific agent:
 
-| Flag | What do |
+```bash
+npx skills add julioccorderoc/download-gmail-attachments -a claude-code
+npx skills add julioccorderoc/download-gmail-attachments -a cursor
+```
+
+### Prerequisites
+
+- **Python 3.13+** (stdlib only, zero pip dependencies)
+- **[uv](https://docs.astral.sh/uv/)** for project management
+- **[gws CLI](https://github.com/nicholasgasior/gws) v0.22.5+** installed and authenticated
+
+```bash
+uv sync --group dev
+```
+
+## Usage
+
+```bash
+uv run python scripts/download_attachments.py <message-id> --to <output-dir>
+```
+
+Read the result:
+
+```bash
+cat <output-dir>/manifest_<message-id>.json
+```
+
+### Flags
+
+| Flag | Description |
 | --- | --- |
-| `--to <dir>` | **(required)** Output dir (created if needed) |
-| `--filter <glob>` | Match filenames: `"*.pdf"`, `"*.{pdf,xlsx}"`, `"COA*"` |
-| `--include-inline` | Include inline images (sigs/logos skipped by default) |
-| `--max-size <MB>` | Skip attachments bigger than this (default: 100) |
-| `--dry-run` | Show what would download, no actual download |
+| `--to <dir>` | **(required)** Output directory (created if needed) |
+| `--filter <glob>` | Filename pattern: `"*.pdf"`, `"*.{pdf,xlsx}"`, `"COA*"` |
+| `--include-inline` | Include inline images (signatures/logos skipped by default) |
+| `--max-size <MB>` | Skip attachments larger than this (default: 100) |
+| `--dry-run` | Show what would download without downloading |
 | `--json-summary` | Print summary JSON to stdout |
 
-## Exit Codes
+### Exit Codes
 
-| Code | Mean | Do what |
+| Code | Meaning | Action |
 | --- | --- | --- |
 | 0 | Success | Read manifest |
-| 1 | Auth fail | Re-auth gws |
+| 1 | Auth failure | Re-authenticate gws |
 | 2 | Not found | Check message ID |
 | 3 | API error | Retry once |
 | 4 | No attachments | Check `skipped[]` in manifest |
-| 5 | Disk error | Check perms/space |
+| 5 | Disk error | Check permissions/space |
 
-Exit 4 not error. Email had no matching attachments. Manifest still written.
+Exit 4 is not an error. Email had no matching attachments. Manifest still written.
 
 ## Manifest
 
-Script write `manifest_<message-id>.json` in output dir. Has everything agent need:
+The script writes `manifest_<message-id>.json` in the output directory with everything an agent needs to decide next steps:
 
 ```json
 {
-  "message_id": "19d77c4017cb684d",
-  "subject": "Fw: Update on open orders | Protab | NCL",
-  "from": "Julio Cordero <julio@naturalcurelabs.com>",
+  "message_id": "your-message-id",
+  "subject": "Your-subject",
+  "from": "your-email@gmail.com",
   "date": "2026-04-10T14:20:23Z",
   "files": [
     {
-      "filename": "YK772_MONOLAURIN_600_MG.pdf",
+      "filename": "your-file.pdf",
       "mime_type": "application/pdf",
       "size_bytes": 184394,
       "sha256": "a1b2c3..."
@@ -78,46 +91,46 @@ Script write `manifest_<message-id>.json` in output dir. Has everything agent ne
 }
 ```
 
-Every attachment in `files[]` or `skipped[]` with reason. Nothing silently dropped.
+Every attachment ends up in `files[]` or `skipped[]` with a reason. Nothing is silently dropped.
 
-## How It Work
+## How It Works
 
 ```text
 Message ID
-    │
-    ▼
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Fetch msg  │────▶│  Parse MIME  │────▶│  Classify   │
-│  (_gws.py)  │     │  (_mime.py)  │     │  parts      │
-└─────────────┘     └──────────────┘     └──────┬──────┘
-                                                │
-                         ┌──────────────────────┴───────┐
-                         ▼                              ▼
-                  ┌─────────────┐              ┌──────────────┐
-                  │  Download   │              │  Skip inline │
-                  │  + decode   │              │  (to skipped)│
-                  │  (_fileops) │              └──────────────┘
-                  └──────┬──────┘
-                         ▼
-                  ┌──────────────┐
-                  │  Write files │
-                  │  + manifest  │
-                  │  (_manifest) │
-                  └──────────────┘
+    |
+    v
++-----------+     +------------+     +-----------+
+| Fetch msg |---->| Parse MIME |---->| Classify  |
+| (_gws.py) |     | (_mime.py) |     | parts     |
++-----------+     +------------+     +-----+-----+
+                                           |
+                       +-------------------+--------+
+                       v                            v
+                +-----------+              +--------------+
+                | Download  |              | Skip inline  |
+                | + decode  |              | (to skipped) |
+                | (_fileops)|              +--------------+
+                +-----+-----+
+                      v
+                +--------------+
+                | Write files  |
+                | + manifest   |
+                | (_manifest)  |
+                +--------------+
 ```
 
 ## Project Structure
 
 ```text
 scripts/
-├── download_attachments.py   # orchestrator + CLI
-├── _gws.py                   # gws wrapper (only subprocess user)
-├── _mime.py                   # MIME walk + classify
-├── _fileops.py                # decode, sanitize, write
-└── _manifest.py               # manifest dataclass + JSON
+  download_attachments.py   # orchestrator + CLI
+  _gws.py                   # gws wrapper (only subprocess caller)
+  _mime.py                   # MIME walk + classify
+  _fileops.py                # decode, sanitize, write
+  _manifest.py               # manifest dataclass + JSON
 
-tests/                         # pytest, TDD
-test_data/                     # scrubbed real gws output
+tests/                       # pytest, TDD (121 tests)
+test_data/                   # scrubbed real gws output
 ```
 
 ## Testing
@@ -128,9 +141,12 @@ uv run pytest -m "not integration"    # unit only (no gws needed)
 uv run pytest -m integration          # needs gws auth
 ```
 
-## Tech
+## Why This Exists
 
-- **Python 3.13+**, stdlib only. Zero pip deps.
-- **`uv`** for project mgmt
-- **`gws` CLI** for Gmail API. Already installed + authed.
-- All gws quirks (stderr noise, URL-safe base64, MIME nesting) handled internally. Never leak to caller.
+Without this skill: 7+ tool calls, learn gws syntax, wrestle MIME trees, decode URL-safe base64. Every conversation re-learns the same quirks.
+
+With this skill: one call, zero discovery, manifest tells the agent everything.
+
+## License
+
+MIT
